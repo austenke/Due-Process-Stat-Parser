@@ -1,0 +1,14 @@
+{
+  "name": "@austenke/due-process-stat-parser",
+  "version": "1.0.0",
+  "description": "Library for parsing player stats from Due Process log files",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Austen Keene",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.9.10"
+  }
+}
