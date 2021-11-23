@@ -6,7 +6,7 @@ export class LogParser {
     private static TEAM_NAME_REGEX: RegExp = /RoundGUI :: Start\(\) Team Name Text (.+): \[(.+)\]/;
     private static STATS_REGEX: RegExp = /Stats :: (.+) :: (.+)/;
 
-    public static parseFile(file: any, callback: { (fileName: string, matches: Match[]): void; }) {
+    public static parseFile(file: File, callback: { (fileName: string, matches: Match[]): void; }) {
         const reader = new FileReader();
         reader.onload = event => {
             if (event?.target?.result == null || typeof event.target.result !== 'string') {
