@@ -13,12 +13,12 @@ export class LogParser {
                 console.log("Could not read file, event returned null or did not return a string result");
                 return;
             }
-            this.handleFileLoad(event.target.result, file.name, callback);
+            LogParser.parseFileData(event.target.result, file.name, callback);
         };
         reader.readAsText(file);
     }
 
-    private static handleFileLoad(data: string, fileName: string, callback: { (fileName: string, matches: Match[]): void; }) {
+    public static parseFileData(data: string, fileName: string, callback: { (fileName: string, matches: Match[]): void; }) {
         let fileLines = data.split("\n");
         let matches: Match[] = [];
         let currentMatch: Match | undefined;
