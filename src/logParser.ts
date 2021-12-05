@@ -48,11 +48,11 @@ export class LogParser {
 
                 if (stats[1] === "Kill") {
                     let event = new KillEvent(parsedJson);
-                    currentMatch.events[currentMatch.latestRound].push(event);
+                    currentMatch.addEvent(event);
                     currentMatch.getRound(round).addKill(event);
                 } else if (stats[1] === "Damage") {
                     let event = new DamageEvent(parsedJson);
-                    currentMatch.events[currentMatch.latestRound].push(event);
+                    currentMatch.addEvent(event);
                     currentMatch.getRound(round).addDamage(event);
                 } else if (stats[1].startsWith("Team")) {
                     let team = parseInt(stats[1].slice(-1));

@@ -1,6 +1,6 @@
 {
   "name": "@austenke/due-process-stat-parser",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Library for parsing player stats from Due Process log files",
   "main": "lib/index.js",
   "scripts": {

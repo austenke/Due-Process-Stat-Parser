@@ -310,6 +310,13 @@ export class Match {
         });
     }
 
+    public addEvent(event: GameEvent) {
+        if (!this.events.hasOwnProperty(event.round)) {
+            this.events[event.round] = [];
+        }
+        this.events[event.round].push(event);
+    }
+
     private getOrCreateUser(entityId: number): User {
         if (!this.users[entityId]) {
             this.users[entityId] = new User();
