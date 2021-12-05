@@ -1,4 +1,4 @@
-import {DamageEvent, KillEvent, Member, TeamEvent} from "./events";
+import {DamageEvent, GameEvent, KillEvent, Member, TeamEvent} from "./events";
 import {DamageSource} from "./damageSource";
 
 const TICK_RATE: number = 30;
@@ -244,14 +244,16 @@ export interface IMatch {
 
 export class Match {
     readonly matchId: number;
+
     public users: {[entityId: number]: User} = {};
     public team1: Team = new Team(1);
     public team2: Team = new Team(2);
+
     public roundCount: number = 0;
-
     public latestRound: number = -1;
-
     public rounds: {[round: number]: Round} = {};
+
+    public events: {[round: number]: GameEvent[]} = {};
 
     constructor(matchId: number) {
         this.matchId = matchId;

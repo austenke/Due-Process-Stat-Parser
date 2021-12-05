@@ -38,7 +38,7 @@ export class LogParser {
 
                 let round = parseInt(parsedJson["round"]);
 
-                if (!currentMatch || (parsedJson.hasOwnProperty("round") && round < currentMatch.latestRound)) {
+                if (!currentMatch || (parsedJson.hasOwnProperty("round") && round < (currentMatch.latestRound - 1))) {
                     if (currentMatch) {
                         currentMatch.complete();
                         matches.push(currentMatch);
@@ -47,9 +47,13 @@ export class LogParser {
                 }
 
                 if (stats[1] === "Kill") {
-                    currentMatch.getRound(round).addKill(new KillEvent(parsedJson));
+                    let event = new KillEvent(parsedJson);
+                    currentMatch.events[currentMatch.latestRound].push(event);
+                    currentMatch.getRound(round).addKill(event);
                 } else if (stats[1] === "Damage") {
-                    currentMatch.getRound(round).addDamage(new DamageEvent(parsedJson));
+                    let event = new DamageEvent(parsedJson);
+                    currentMatch.events[currentMatch.latestRound].push(event);
+                    currentMatch.getRound(round).addDamage(event);
                 } else if (stats[1].startsWith("Team")) {
                     let team = parseInt(stats[1].slice(-1));
                     currentMatch.addTeam(team, new TeamEvent(parsedJson));
