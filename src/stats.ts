@@ -95,6 +95,7 @@ export interface ITeam {
 export class Team implements ITeam {
     public wins: number = 0;
     public userNames: {[entityId: number]: string} = {};
+    public accountIds: {[entityId: number]: string} = {};
     readonly teamNumber: number;
     public name: string;
 
@@ -299,6 +300,7 @@ export class Match {
         teamEvent.members.forEach((member: Member) => {
             this.getRound(this.latestRound).participants.push(member.entityId);
             team.userNames[member.entityId] = member.name;
+            team.accountIds[member.entityId] = member.accountId;
 
             if (teamEvent.side === 0) {
                 this.getOrCreateUser(member.entityId).atkRoundsPlayed++;
