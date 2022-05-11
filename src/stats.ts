@@ -56,7 +56,9 @@ export class User implements IUser{
         this.openingKills += user.openingKills;
         this.openingKillAttempts += user.openingKillAttempts;
         this.atkDamageDealt += user.atkDamageDealt;
+        this.atkRoundsPlayed += user.atkRoundsPlayed;
         this.defDamageDealt += user.defDamageDealt;
+        this.defRoundsPlayed += user.defRoundsPlayed;
         this.tradeKills += user.tradeKills;
         this.timesTraded += user.timesTraded;
         this.kastCount += user.kastCount;
@@ -158,6 +160,7 @@ export class Round {
         let minAssistDmg = getMaxHealth(killEvent.victimSide) * .3;
         Object.keys(victim.damageReceived).map(Number).forEach((entityId: number) => {
             if (entityId === killEvent.attackerId || entityId === killEvent.victimId) return;
+            // Damage received map only contains damage from enemy players
             if (victim.damageReceived[entityId] >= minAssistDmg) {
                 this.getOrCreateUser(entityId).assists += 1;
             }
@@ -255,6 +258,8 @@ export class Match {
     public rounds: {[round: number]: Round} = {};
 
     public events: {[round: number]: GameEvent[]} = {};
+
+    public spectators: string[] = [];
 
     constructor(matchId: number) {
         this.matchId = matchId;

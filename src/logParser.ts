@@ -5,6 +5,8 @@ export class LogParser {
 
     private static TEAM_NAME_REGEX: RegExp = /RoundGUI :: Start\(\) Team Name Text (.+): \[(.+)\]/;
     private static STATS_REGEX: RegExp = /Stats :: (.+) :: (.+)/;
+    private static RESET_REGEX: RegExp = /Stats :: Resetting/;
+    private static GECNET_MESSAGE: RegExp = /Received GECNet message (.+)/;
 
     public static parseFile(file: File, callback: { (fileName: string, matches: Match[]): void; }) {
         const reader = new FileReader();
@@ -22,8 +24,40 @@ export class LogParser {
         let fileLines = data.split("\n");
         let matches: Match[] = [];
         let currentMatch: Match | undefined;
+        let accountId: string | undefined;
 
         fileLines.forEach((line: string) => {
+            let gecnet = line.match(LogParser.GECNET_MESSAGE);
+            if (gecnet && gecnet[0]) {
+                let json = JSON.parse(gecnet[1]);
+                if (json.data) {
+                    if (json.type === "myProfile") {
+                        let data = JSON.parse(json.data);
+                        accountId = data.AccountId;
+                    } else if (json.type === "updateMatchScore") {
+                        let data = JSON.parse(json.data);
+                        if (accountId && (data.Team1Members.includes(accountId) || data.Team2Members.includes(accountId))) {
+                            data.Spectators.forEach((spectator: string) => {
+                                if (!currentMatch?.spectators.includes(spectator)) {
+                                    currentMatch?.spectators.push(spectator);
+                                    console.log("Added " + spectator + " to current match");
+                                }
+                            });
+                        }
+                    }
+                }
+                return;
+            }
+
+            let reset = line.match(LogParser.RESET_REGEX);
+            if (reset && reset[0]) {
+                if (currentMatch) {
+                    currentMatch.complete();
+                    matches.push(currentMatch);
+                    currentMatch = new Match(matches.length + 1);
+                }
+            }
+
             let stats = line.match(LogParser.STATS_REGEX);
             if (stats && stats[0]) {
                 let parsedJson: any;
@@ -36,31 +70,37 @@ export class LogParser {
                     return;
                 }
 
-                let round = parseInt(parsedJson["round"]);
-
-                if (!currentMatch || (parsedJson.hasOwnProperty("round") && round < (currentMatch.latestRound - 1))) {
-                    if (currentMatch) {
-                        currentMatch.complete();
-                        matches.push(currentMatch);
+                if (parsedJson.hasOwnProperty("round")) {
+                    let round = parseInt(parsedJson["round"]);
+                    if (!currentMatch || round < (currentMatch.latestRound - 1)) {
+                        if (currentMatch) {
+                            currentMatch.complete();
+                            matches.push(currentMatch);
+                        }
+                        currentMatch = new Match(matches.length + 1);
                     }
-                    currentMatch = new Match(matches.length + 1);
+
+                    if (stats[1] === "Kill") {
+                        let event = new KillEvent(parsedJson);
+                        currentMatch.addEvent(event);
+                        currentMatch.getRound(round).addKill(event);
+                        return;
+                    } else if (stats[1] === "Damage") {
+                        let event = new DamageEvent(parsedJson);
+                        currentMatch.addEvent(event);
+                        currentMatch.getRound(round).addDamage(event);
+                        return;
+                    }
                 }
 
-                if (stats[1] === "Kill") {
-                    let event = new KillEvent(parsedJson);
-                    currentMatch.addEvent(event);
-                    currentMatch.getRound(round).addKill(event);
-                } else if (stats[1] === "Damage") {
-                    let event = new DamageEvent(parsedJson);
-                    currentMatch.addEvent(event);
-                    currentMatch.getRound(round).addDamage(event);
-                } else if (stats[1].startsWith("Team")) {
+                if (currentMatch && stats[1].startsWith("Team")) {
                     let team = parseInt(stats[1].slice(-1));
                     currentMatch.addTeam(team, new TeamEvent(parsedJson));
-                } else {
-                    console.log("Unknown stat: ");
-                    console.log(stats);
+                    return;
                 }
+
+                console.log("Unknown stat: ");
+                console.log(stats);
             } else if (currentMatch) {
                 let name = line.match(LogParser.TEAM_NAME_REGEX);
                 if (name && name[0]) {
@@ -71,6 +111,7 @@ export class LogParser {
                     } else {
                         console.log("UNKNOWN TEAM: " + name[1]);
                     }
+                    return;
                 }
             }
         });
