@@ -27,7 +27,7 @@ export class DamageEvent extends GameEvent {
     }
 }
 
-export class KillEvent extends GameEvent {
+export class KillEvent extends GameEvent { // eslint-disable-next-line
     constructor(json: any) {
         super(json);
     }

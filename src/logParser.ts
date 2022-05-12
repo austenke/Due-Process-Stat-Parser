@@ -24,31 +24,8 @@ export class LogParser {
         let fileLines = data.split("\n");
         let matches: Match[] = [];
         let currentMatch: Match | undefined;
-        let accountId: string | undefined;
-
+        
         fileLines.forEach((line: string) => {
-            let gecnet = line.match(LogParser.GECNET_MESSAGE);
-            if (gecnet && gecnet[0]) {
-                let json = JSON.parse(gecnet[1]);
-                if (json.data) {
-                    if (json.type === "myProfile") {
-                        let data = JSON.parse(json.data);
-                        accountId = data.AccountId;
-                    } else if (json.type === "updateMatchScore") {
-                        let data = JSON.parse(json.data);
-                        if (accountId && (data.Team1Members.includes(accountId) || data.Team2Members.includes(accountId))) {
-                            data.Spectators.forEach((spectator: string) => {
-                                if (!currentMatch?.spectators.includes(spectator)) {
-                                    currentMatch?.spectators.push(spectator);
-                                    console.log("Added " + spectator + " to current match");
-                                }
-                            });
-                        }
-                    }
-                }
-                return;
-            }
-
             let reset = line.match(LogParser.RESET_REGEX);
             if (reset && reset[0]) {
                 if (currentMatch) {

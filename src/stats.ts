@@ -259,7 +259,7 @@ export class Match {
 
     public events: {[round: number]: GameEvent[]} = {};
 
-    public spectators: string[] = [];
+    public spectators: {[steamId: string]: string} = {};
 
     constructor(matchId: number) {
         this.matchId = matchId;
@@ -281,7 +281,9 @@ export class Match {
         } else if (team === 1) {
             this.updateTeam(this.team2, teamEvent);
         } else {
-            console.log("Ignoring team " + team);
+            teamEvent.members.forEach((member: Member) => {
+                this.spectators[member.accountId] = member.name;
+            });
         }
     }
 
